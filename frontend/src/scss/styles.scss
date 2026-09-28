@@ -1,9 +1,9 @@
-@use './normalize';
-@use './YSText';
-@use './Garamond';
-@use './Glyphter';
+@use "./normalize";
+@use "./YSText";
+@use "./Garamond";
+@use "./Glyphter";
 
-@use 'variables' as *;
+@use "./variables" as *;
 
 html,
 body.page {
