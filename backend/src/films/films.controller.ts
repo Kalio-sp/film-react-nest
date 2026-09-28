@@ -10,13 +10,13 @@ export class FilmsController {
     return this.filmsService.getFilms();
   }
 
-  @Get(':id')
-  getFilm(@Param('id') id: string) {
-    return this.filmsService.getFilm(id);
-  }
-
   @Get(':id/schedule')
   getFilmSchedule(@Param('id') id: string) {
     return this.filmsService.getFilmSchedule(id);
+  }
+
+  @Get(':id')
+  getFilm(@Param('id') id: string) {
+    return this.filmsService.getFilm(id);
   }
 }

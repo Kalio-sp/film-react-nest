@@ -16,22 +16,22 @@ export class FilmsRepository {
   }
 
   findOne(id: string) {
-    return this.filmModel.findById(id).exec();
+    return this.filmModel.findOne({ id }).exec();
   }
 
   findById(id: string) {
-    return this.filmModel.findById(id).exec();
+    return this.filmModel.findOne({ id }).exec();
   }
 
   findSchedule(id: string) {
     return this.filmModel
-      .findById(id)
+      .findOne({ id })
       .select('schedule')
       .exec()
       .then((film) => film?.schedule ?? []);
   }
 
-  async update(id: string, film: FilmDocument) {
-    return this.filmModel.findByIdAndUpdate(id, film, { new: true }).exec();
+  update(id: string, film: FilmDocument) {
+    return this.filmModel.findOneAndUpdate({ id }, film, { new: true }).exec();
   }
 }

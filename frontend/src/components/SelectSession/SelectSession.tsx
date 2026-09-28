@@ -3,8 +3,7 @@ import clsx from "clsx";
 
 export type ScheduleSession = {
   id: string;
-  day: string;
-  time: string;
+  daytime: string;
 };
 
 export type SelectSessionProps = {
@@ -28,8 +27,14 @@ export function SelectSession({
           })}
           onClick={() => onSelect(session.id)}
         >
-          <span>{session.day}</span>
-          <span>{session.time}</span>
+          <span>
+            {new Date(session.daytime).toLocaleString("ru-RU", {
+              day: "2-digit",
+              month: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
         </button>
       ))}
     </div>

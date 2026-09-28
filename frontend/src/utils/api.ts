@@ -1,5 +1,6 @@
-import dayjs from "dayjs";
 import "dayjs/locale/ru";
+import dayjs from "dayjs";
+import { CDN_URL } from "./constants.ts";
 
 dayjs.locale("ru");
 
@@ -33,10 +34,11 @@ export class Api {
     }
 
     const data = await response.json();
+
     return Promise.reject(data.message ?? response.statusText);
   }
 
-  protected async _get<T>(uri: string) {
+  protected async _get<T>(uri: string): Promise<T> {
     const response = await fetch(this.baseUrl + uri, {
       ...this._options,
       method: EnumApiMethods.GET,
@@ -45,7 +47,7 @@ export class Api {
     return this._handleResponse<T>(response);
   }
 
-  protected async _post<T>(uri: string, data: object) {
+  protected async _post<T>(uri: string, data: object): Promise<T> {
     const response = await fetch(this.baseUrl + uri, {
       ...this._options,
       method: EnumApiMethods.POST,
@@ -58,30 +60,33 @@ export class Api {
 
 export interface Movie {
   id: string;
+  rating: number;
+  director: string;
+  tags: string[];
   title: string;
   about: string;
   description: string;
-  director: string;
-  rating: number;
-  posterImage: string;
+  image: string;
   cover: string;
 }
 
 export interface Session {
   id: string;
-  time: string;
+  daytime: string;
   hall: string;
   rows: number;
   seats: number;
+  price: number;
   taken: string[];
-
-  day?: string;
-  price?: number;
 }
 
 export interface Ticket {
+  film: string;
+  session: string;
+  daytime: string;
   row: number;
   seat: number;
+  price: number;
 }
 
 export interface Contacts {
@@ -90,65 +95,56 @@ export interface Contacts {
 }
 
 export interface Order {
-  filmId: string;
-  scheduleId: string;
+  email: string;
+  phone: string;
   tickets: Ticket[];
-  email?: string;
-  phone?: string;
+}
+
+export interface OrderResponse {
+  total: number;
+  items: Array<
+    Ticket & {
+      id: string;
+    }
+  >;
 }
 
 export interface IFilmAPI {
   getFilms(): Promise<Movie[]>;
+
   getFilmSchedule(id: string): Promise<Session[]>;
-  orderTickets(order: Order): Promise<any>;
+
+  orderTickets(order: Order): Promise<OrderResponse>;
 }
 
 export class FilmAPI extends Api implements IFilmAPI {
-  readonly cdn = "http://localhost:3000";
+  readonly cdn = CDN_URL;
 
   async getFilms(): Promise<Movie[]> {
-    const response = await this._get<any>("/api/afisha/films");
+    const response = await this._get<{
+      total: number;
+      items: Movie[];
+    }>("/films");
 
-    const films = response.items ?? response;
+    return response.items.map((film) => ({
+      ...film,
 
-    return films.map((film: any) => ({
-      id: film.id ?? film._id,
-      title: film.title,
-      about: film.about,
-      description: film.description,
-      director: film.director,
-      rating: film.rating,
+      image: film.image.startsWith("http") ? film.image : this.cdn + film.image,
 
-      posterImage: film.image?.startsWith("http")
-        ? film.image
-        : this.cdn + (film.image ?? film.posterImage),
-
-      cover: film.cover?.startsWith("http")
-        ? film.cover
-        : this.cdn + (film.cover ?? film.image ?? film.posterImage),
+      cover: film.cover.startsWith("http") ? film.cover : this.cdn + film.cover,
     }));
   }
 
   async getFilmSchedule(id: string): Promise<Session[]> {
-    const data = await this._get<any>(`/api/afisha/films/${id}/schedule`);
+    const response = await this._get<{
+      total: number;
+      items: Session[];
+    }>(`/films/${id}/schedule`);
 
-    const schedule = Array.isArray(data)
-      ? data
-      : data.schedule ?? data.items ?? [];
-
-    return schedule.map((item: any) => ({
-      id: item.id,
-      time: item.time,
-      hall: item.hall,
-      rows: item.rows,
-      seats: item.seats,
-      taken: item.taken ?? [],
-      day: item.day ?? "",
-      price: item.price ?? 500,
-    }));
+    return response.items;
   }
 
-  async orderTickets(order: Order) {
-    return this._post("/api/afisha/order", order);
+  async orderTickets(order: Order): Promise<OrderResponse> {
+    return this._post<OrderResponse>("/order", order);
   }
 }

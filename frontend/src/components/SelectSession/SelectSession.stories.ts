@@ -1,46 +1,43 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
-import { SelectSession } from './SelectSession';
+import type { Meta, StoryObj } from "@storybook/react";
+import { SelectSession } from "./SelectSession";
 
-const meta = {
-  title: 'UI/SelectSession',
+const meta: Meta<typeof SelectSession> = {
+  title: "Components/SelectSession",
   component: SelectSession,
-  parameters: {
-    layout: 'centered',
-  },
-  args: {
-    onSelect: fn(),
-  },
-} satisfies Meta<typeof SelectSession>;
+};
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+
+type Story = StoryObj<typeof SelectSession>;
 
 export const Default: Story = {
   args: {
+    selected: null,
+
     sessions: [
       {
-        id: '1',
-        day: 'Monday',
-        time: '10:00',
+        id: "1",
+        daytime: "2026-09-28T10:30:00.000Z",
       },
+
       {
-        id: '1',
-        day: 'Monday',
-        time: '12:00',
+        id: "2",
+        daytime: "2026-09-28T13:00:00.000Z",
       },
+
       {
-        id: '2',
-        day: 'Tuesday',
-        time: '11:00',
+        id: "3",
+        daytime: "2026-09-28T16:30:00.000Z",
       },
+
       {
-        id: '3',
-        day: 'Wednesday',
-        time: '12:00',
+        id: "4",
+        daytime: "2026-09-28T19:00:00.000Z",
       },
     ],
-    selected: null,
-    onSelect: fn(),
+
+    onSelect: (id: string) => {
+      console.log(id);
+    },
   },
 };

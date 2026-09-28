@@ -9,15 +9,18 @@ export class FilmsService {
     const films = await this.filmsRepository.findAll();
 
     return {
+      total: films.length,
+
       items: films.map((film) => ({
-        id: film._id.toString(),
-        title: film.title,
-        about: film.description,
-        description: film.description,
-        director: film.director,
+        id: film.id,
         rating: film.rating,
-        image: film.posterImage,
-        cover: film.posterImage,
+        director: film.director,
+        tags: film.tags,
+        title: film.title,
+        about: film.about,
+        description: film.description,
+        image: film.image,
+        cover: film.cover,
       })),
     };
   }
@@ -33,12 +36,11 @@ export class FilmsService {
   }
 
   async getFilmSchedule(id: string) {
-    const film = await this.filmsRepository.findOne(id);
+    const schedule = await this.filmsRepository.findSchedule(id);
 
-    if (!film) {
-      throw new NotFoundException('Film not found');
-    }
-
-    return film.schedule ?? [];
+    return {
+      total: schedule.length,
+      items: schedule,
+    };
   }
 }

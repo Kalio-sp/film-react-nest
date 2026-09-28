@@ -47,6 +47,7 @@ export function SelectPlaces({
 
               return (
                 <button
+                  type="button"
                   key={key}
                   className={clsx(styles.seat, {
                     [styles.active]: selectedSeats.has(key),

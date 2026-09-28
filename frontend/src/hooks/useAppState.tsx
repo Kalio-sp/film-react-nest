@@ -34,9 +34,12 @@ export function useAppState() {
 
   const basket = state.basket.map((ticket) => ({
     id: `${ticket.row}:${ticket.seat}`,
+
     place: `${ticket.row} ряд, ${ticket.seat} место`,
-    price: "500₽",
-    session: session ? `${session.day} ${session.time}` : "",
+
+    price: `${session?.price ?? 0}₽`,
+
+    session: session?.daytime ?? "",
   }));
 
   const setFilms = (items: Movie[]) =>
@@ -87,13 +90,27 @@ export function useAppState() {
     });
 
   const orderTickets = () => {
+    const tickets = state.basket.map((ticket) => ({
+      film: state.selectedFilm!,
+
+      session: state.selectedSession!,
+
+      daytime: session?.daytime ?? "",
+
+      row: ticket.row,
+
+      seat: ticket.seat,
+
+      price: session?.price ?? 0,
+    }));
+
     api.current
       .orderTickets({
-        filmId: state.selectedFilm!,
-        scheduleId: state.selectedSession!,
         email: state.contacts.email,
+
         phone: state.contacts.phone,
-        tickets: state.basket,
+
+        tickets,
       })
       .then(() => {
         dispatch({
@@ -173,16 +190,7 @@ export function useAppState() {
 
   const handleOpenFilm = () => {
     if (state.selectedFilm) {
-      api.current.getFilmSchedule(state.selectedFilm).then((data) => {
-        setCurrentSchedule(data);
-
-        if (data.length > 0) {
-          dispatch({
-            type: "selectSession",
-            payload: data[0].id,
-          });
-        }
-      });
+      api.current.getFilmSchedule(state.selectedFilm).then(setCurrentSchedule);
 
       dispatch({
         type: "openModal",
@@ -206,14 +214,23 @@ export function useAppState() {
 
     handlers: {
       setSelectedFilm,
+
       selectSession,
+
       selectPlace,
+
       removeTicket,
+
       closeModal,
+
       setContacts,
+
       handleOpenBasket,
+
       handleOpenFilm,
+
       getAction,
+
       go,
     },
   };

@@ -1,18 +1,25 @@
-export interface AppConfig {
-  database: AppConfigDatabase;
-}
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
-export interface AppConfigDatabase {
-  driver: string;
-  url: string;
+export interface AppConfig {
+  port: number;
+
+  database: {
+    url: string;
+  };
 }
 
 export const configProvider = {
+  imports: [ConfigModule],
+
   provide: 'CONFIG',
-  useFactory: (): AppConfig => ({
+
+  inject: [ConfigService],
+
+  useFactory: (configService: ConfigService): AppConfig => ({
+    port: Number(configService.get<string>('PORT')) || 3000,
+
     database: {
-      driver: 'mongodb',
-      url: process.env.MONGO_URL ?? '',
+      url: configService.get<string>('MONGO_URL') ?? '',
     },
   }),
 };

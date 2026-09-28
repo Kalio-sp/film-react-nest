@@ -7,7 +7,6 @@ import { configProvider } from './app.config.provider';
 
 import { FilmsModule } from './films/films.module';
 import { OrderModule } from './order/order.module';
-
 import { DatabaseModule } from './database/database.module';
 
 @Module({
@@ -25,6 +24,7 @@ import { DatabaseModule } from './database/database.module';
     }),
 
     FilmsModule,
+
     OrderModule,
   ],
 

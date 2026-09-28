@@ -3,12 +3,13 @@ import { HydratedDocument } from 'mongoose';
 
 export type FilmDocument = HydratedDocument<Film>;
 
+@Schema({ _id: false })
 export class Schedule {
   @Prop()
   id: string;
 
   @Prop()
-  time: string;
+  daytime: string;
 
   @Prop()
   hall: string;
@@ -19,21 +20,36 @@ export class Schedule {
   @Prop()
   seats: number;
 
+  @Prop()
+  price: number;
+
   @Prop({
     type: [String],
     default: [],
   })
   taken: string[];
-
-  @Prop()
-  day?: string;
-
-  @Prop()
-  price?: number;
 }
 
 @Schema()
 export class Film {
+  @Prop({
+    required: true,
+    unique: true,
+  })
+  id: string;
+
+  @Prop()
+  rating: number;
+
+  @Prop()
+  director: string;
+
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  tags: string[];
+
   @Prop()
   title: string;
 
@@ -44,13 +60,7 @@ export class Film {
   description: string;
 
   @Prop()
-  director: string;
-
-  @Prop()
-  rating: number;
-
-  @Prop()
-  posterImage: string;
+  image: string;
 
   @Prop()
   cover: string;
