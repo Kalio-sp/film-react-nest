@@ -1,4 +1,5 @@
 import { ReactNode, Reducer, useEffect, useReducer, useRef } from "react";
+
 import {
   Actions,
   appReducer,
@@ -6,7 +7,9 @@ import {
   initialState,
   Modals,
 } from "../utils/state.ts";
+
 import { Contacts, FilmAPI, IFilmAPI, Movie, Session } from "../utils/api.ts";
+
 import { API_URL } from "../utils/constants.ts";
 import { Button } from "../components/Button/Button.tsx";
 
@@ -37,59 +40,79 @@ export function useAppState() {
 
     place: `${ticket.row} ряд, ${ticket.seat} место`,
 
-    price: `${session?.price ?? 0}₽`,
+    price: `${ticket.price}₽`,
 
-    session: session?.daytime ?? "",
+    session: ticket.daytime,
   }));
 
-  const setFilms = (items: Movie[]) =>
+  const setFilms = (items: Movie[]) => {
     dispatch({
       type: "setFilms",
       payload: items,
     });
+  };
 
-  const setSelectedFilm = (id: string) =>
+  const setSelectedFilm = (id: string) => {
     dispatch({
       type: "selectFilm",
       payload: id,
     });
+  };
 
-  const setCurrentSchedule = (items: Session[]) =>
+  const setCurrentSchedule = (items: Session[]) => {
     dispatch({
       type: "setSchedule",
       payload: items,
     });
+  };
 
-  const selectSession = (id: string) =>
+  const selectSession = (id: string) => {
     dispatch({
       type: "selectSession",
       payload: id,
     });
+  };
 
-  const selectPlace = (place: string) =>
+  const selectPlace = (place: string) => {
     dispatch({
       type: "addToBasket",
       payload: place,
     });
+  };
 
-  const removeTicket = (place: string) =>
+  const removeTicket = (place: string) => {
     dispatch({
       type: "removeFromBasket",
       payload: place,
     });
+  };
 
-  const closeModal = () =>
+  const closeModal = () => {
     dispatch({
       type: "closeModal",
     });
+  };
 
-  const setContacts = (contacts: Contacts) =>
+  const setContacts = (contacts: Contacts) => {
     dispatch({
       type: "setContacts",
       payload: contacts,
     });
+  };
 
   const orderTickets = () => {
+    if (!state.selectedFilm || !state.selectedSession) {
+      return;
+    }
+
+    if (!state.contacts.email || !state.contacts.phone) {
+      return;
+    }
+
+    if (state.isError) {
+      return;
+    }
+
     const tickets = state.basket.map((ticket) => ({
       film: state.selectedFilm!,
 
@@ -101,8 +124,14 @@ export function useAppState() {
 
       seat: ticket.seat,
 
-      price: session?.price ?? 0,
+      price: ticket.price,
     }));
+
+    console.log("SEND ORDER", {
+      email: state.contacts.email,
+      phone: state.contacts.phone,
+      tickets,
+    });
 
     api.current
       .orderTickets({
@@ -112,7 +141,15 @@ export function useAppState() {
 
         tickets,
       })
-      .then(() => {
+
+      .then((result) => {
+        console.log("ORDER RESPONSE", result);
+
+        dispatch({
+          type: "saveOrder",
+          payload: result.items,
+        });
+
         dispatch({
           type: "clearBasket",
         });
@@ -121,11 +158,17 @@ export function useAppState() {
           type: "openModal",
           payload: "success",
         });
+      })
+
+      .catch((error) => {
+        console.error("ORDER ERROR", error);
       });
   };
 
   const go = (direction: "next" | "prev") => () => {
-    if (!state.modal) return;
+    if (!state.modal) {
+      return;
+    }
 
     const next = flow[state.modal][direction];
 
@@ -171,7 +214,9 @@ export function useAppState() {
         <Button
           label="Оплатить"
           onClick={orderTickets}
-          disabled={!state.contacts.email || !state.contacts.phone}
+          disabled={
+            !state.contacts.email || !state.contacts.phone || state.isError
+          }
         />
       ),
 
@@ -184,6 +229,7 @@ export function useAppState() {
   const handleOpenBasket = () => {
     dispatch({
       type: "openModal",
+
       payload: "basket",
     });
   };
@@ -194,6 +240,7 @@ export function useAppState() {
 
       dispatch({
         type: "openModal",
+
         payload: "schedule",
       });
     }
@@ -208,8 +255,12 @@ export function useAppState() {
 
     data: {
       preview,
+
       session,
+
       basket,
+
+      orders: state.orders,
     },
 
     handlers: {
@@ -232,6 +283,8 @@ export function useAppState() {
       getAction,
 
       go,
+
+      orderTickets,
     },
   };
 }

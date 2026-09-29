@@ -1,13 +1,28 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 
 import { OrderDto } from './dto/order.dto';
 import { FilmsRepository } from '../films/films.repository';
 
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { Order } from './entities/order.entity';
+
 @Injectable()
 export class OrderService {
-  constructor(private readonly filmsRepository: FilmsRepository) {}
+  constructor(
+    private readonly filmsRepository: FilmsRepository,
+
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
+  ) {}
 
   async createOrder(orderDto: OrderDto) {
+    if (!orderDto.tickets.length) {
+      throw new BadRequestException('Tickets required');
+    }
+
     const firstTicket = orderDto.tickets[0];
 
     const film = await this.filmsRepository.findById(firstTicket.film);
@@ -28,12 +43,10 @@ export class OrderService {
       (ticket) => `${ticket.row}:${ticket.seat}`,
     );
 
-    // проверка дубликатов внутри заказа
     if (new Set(seatKeys).size !== seatKeys.length) {
       throw new BadRequestException('Duplicate seats');
     }
 
-    // проверка существования мест
     for (const ticket of orderDto.tickets) {
       if (
         ticket.row < 1 ||
@@ -51,17 +64,19 @@ export class OrderService {
       }
     }
 
-    // сохраняем занятые места
-
     schedule.taken.push(...seatKeys);
 
     await this.filmsRepository.update(firstTicket.film, film);
 
-    return {
-      total: orderDto.tickets.length,
+    const savedOrder = await this.orderRepository.save({
+      id: randomUUID(),
 
-      items: orderDto.tickets.map((ticket) => ({
-        id: crypto.randomUUID(),
+      email: orderDto.email,
+
+      phone: orderDto.phone,
+
+      tickets: orderDto.tickets.map((ticket) => ({
+        id: randomUUID(),
 
         film: ticket.film,
 
@@ -75,6 +90,28 @@ export class OrderService {
 
         price: ticket.price,
       })),
+    });
+
+    return {
+      total: savedOrder.tickets.length,
+
+      items: savedOrder.tickets,
     };
+  }
+
+  async getOrders(email: string) {
+    return this.orderRepository.find({
+      where: {
+        email,
+      },
+
+      relations: {
+        tickets: true,
+      },
+
+      order: {
+        createdAt: 'DESC',
+      },
+    });
   }
 }
