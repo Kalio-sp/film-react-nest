@@ -2,11 +2,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { Order } from '../order/entities/order.entity';
-import { OrderTicket } from '../order/entities/order-ticket.entity';
-
 import { Film } from '../films/entities/film.entity';
 import { Schedule } from '../films/entities/schedule.entity';
+import { Order } from '../order/entities/order.entity';
+import { OrderTicket } from '../order/entities/order-ticket.entity';
 
 @Module({
   imports: [
@@ -18,10 +17,13 @@ import { Schedule } from '../films/entities/schedule.entity';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
 
-        host: 'localhost',
-        port: 5432,
+        url: config.get<string>('DATABASE_URL'),
 
-        database: 'films',
+        host: config.get<string>('DATABASE_HOST'),
+
+        port: Number(config.get<string>('DATABASE_PORT')),
+
+        database: config.get<string>('DATABASE_NAME'),
 
         username: config.get<string>('DATABASE_USERNAME'),
 

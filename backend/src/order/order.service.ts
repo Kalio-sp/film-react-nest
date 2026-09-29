@@ -1,18 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
-import { OrderDto } from './dto/order.dto';
-import { FilmsRepository } from '../films/films.repository';
-
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
+import { OrderDto } from './dto/order.dto';
 import { Order } from './entities/order.entity';
+
+import { FilmsRepository } from '../films/films.repository';
 
 @Injectable()
 export class OrderService {
   constructor(
     private readonly filmsRepository: FilmsRepository,
+
+    private readonly dataSource: DataSource,
 
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
@@ -64,32 +66,34 @@ export class OrderService {
       }
     }
 
-    schedule.taken.push(...seatKeys);
+    const savedOrder = await this.dataSource.transaction(async (manager) => {
+      schedule.taken.push(...seatKeys);
 
-    await this.filmsRepository.update(firstTicket.film, film);
+      await manager.save(schedule);
 
-    const savedOrder = await this.orderRepository.save({
-      id: randomUUID(),
-
-      email: orderDto.email,
-
-      phone: orderDto.phone,
-
-      tickets: orderDto.tickets.map((ticket) => ({
+      return manager.save(Order, {
         id: randomUUID(),
 
-        film: ticket.film,
+        email: orderDto.email,
 
-        session: ticket.session,
+        phone: orderDto.phone,
 
-        daytime: ticket.daytime,
+        tickets: orderDto.tickets.map((ticket) => ({
+          id: randomUUID(),
 
-        row: ticket.row,
+          film: ticket.film,
 
-        seat: ticket.seat,
+          session: ticket.session,
 
-        price: ticket.price,
-      })),
+          daytime: ticket.daytime,
+
+          row: ticket.row,
+
+          seat: ticket.seat,
+
+          price: ticket.price,
+        })),
+      });
     });
 
     return {

@@ -55,3 +55,34 @@ CREATE TABLE public.schedules
 
 ALTER TABLE public.schedules
     OWNER TO postgres;
+
+    CREATE TABLE IF NOT EXISTS orders (
+    id UUID PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS order_tickets (
+    id UUID PRIMARY KEY,
+
+    film UUID NOT NULL,
+
+    session UUID NOT NULL,
+
+    daytime VARCHAR(100) NOT NULL,
+
+    row INTEGER NOT NULL,
+
+    seat INTEGER NOT NULL,
+
+    price INTEGER NOT NULL,
+
+    order_id UUID NOT NULL,
+
+    CONSTRAINT fk_order_ticket_order
+        FOREIGN KEY(order_id)
+        REFERENCES orders(id)
+        ON DELETE CASCADE
+);
