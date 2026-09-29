@@ -1,5 +1,5 @@
-@use 'variables' as *;
-@use 'mixins';
+@use "../../scss/variables" as *;
+@use "../../scss/mixins";
 
 .header {
   font-size: 2vh;
@@ -21,7 +21,7 @@
     display: flex;
     gap: 0.25rem;
     &::before {
-      @include mixins.icon(0.7rem, 'back');
+      @include mixins.icon(0.7rem, "back");
     }
   }
 

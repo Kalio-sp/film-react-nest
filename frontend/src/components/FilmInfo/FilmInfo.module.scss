@@ -1,5 +1,5 @@
-@use 'variables' as *;
-@use 'mixins';
+@use "../../scss/variables" as *;
+@use "../../scss/mixins";
 
 .film {
   .about {
@@ -14,14 +14,14 @@
   }
 
   .rating::before {
-    @include mixins.icon(0.7rem, 'star');
+    @include mixins.icon(0.7rem, "star");
     @include mixins.va-fix(-1px);
     margin-right: 0.25rem;
     color: $secondary;
   }
 
   .tags::before {
-    content: '•';
+    content: "•";
     margin-right: 0.25rem;
     font-size: 1.2rem;
     line-height: 1rem;
@@ -34,7 +34,7 @@
     display: flex;
     gap: 0.25rem;
     &::before {
-      @include mixins.icon(0.7rem, 'back');
+      @include mixins.icon(0.7rem, "back");
     }
   }
 

@@ -1,5 +1,5 @@
-@use 'variables' as *;
-@use 'mixins';
+@use "../../scss/variables" as *;
+@use "../../scss/mixins";
 
 .ticket {
   @include mixins.flex(row);
@@ -21,12 +21,12 @@
   }
 
   .place::before {
-    content: '➔';
+    content: "➔";
     margin-right: 0.5rem;
   }
 
   .delete {
-    @include mixins.icon(2rem, 'trash');
+    @include mixins.icon(2rem, "trash");
     @include mixins.link($hover, white);
     opacity: 0.5;
   }

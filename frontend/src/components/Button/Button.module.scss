@@ -1,6 +1,6 @@
-@use 'variables' as *;
-@use 'mixins';
+@use "../../scss/variables" as *;
+@use "../../scss/mixins";
 
 .button {
-	@include mixins.button($primary, white, $secondary);
+  @include mixins.button($primary, white, $secondary);
 }

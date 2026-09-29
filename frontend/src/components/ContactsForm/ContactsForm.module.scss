@@ -1,26 +1,31 @@
-@use 'variables' as *;
-@use 'mixins';
+@use "../../scss/variables" as *;
+@use "../../scss/mixins";
 
 .form {
   @include mixins.flex(column);
   gap: 1.5rem;
+
   background: $primaryLight;
   padding: $defaultPadding;
-  border-radius: 3rem;
+  border-radius: 2rem;
 
   .label {
-    flex-grow: 1;
+    width: 100%;
   }
 
   .input {
-    background: $primary;
-    color: white;
-    border: 1px solid transparent;
-    border-radius: 1.5rem;
-    padding: 1rem;
-    font-size: 1.4rem;
     width: 100%;
     box-sizing: border-box;
+
+    background: $primary;
+    color: white;
+
+    border: 1px solid transparent;
+    border-radius: 1rem;
+
+    padding: 1rem;
+    font-size: 1.2rem;
+
     outline-color: $secondary;
 
     &:focus {
