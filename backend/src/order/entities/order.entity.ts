@@ -13,7 +13,11 @@ export class Order {
   @Column()
   phone: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'created_at',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   createdAt: Date;
 
   @OneToMany(() => OrderTicket, (ticket) => ticket.order, {

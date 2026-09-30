@@ -15,7 +15,7 @@ import { OrderTicket } from '../order/entities/order-ticket.entity';
       inject: [ConfigService],
 
       useFactory: (config: ConfigService) => ({
-        type: 'postgres',
+        type: config.get<any>('DATABASE_DRIVER') || 'postgres',
 
         url: config.get<string>('DATABASE_URL'),
 
