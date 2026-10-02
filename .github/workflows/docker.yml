@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - review-2
 
 permissions:
   contents: read
@@ -42,3 +43,11 @@ jobs:
           push: true
           tags: |
             ghcr.io/kalio-sp/film-react-nest-frontend:latest
+
+      - name: Build nginx
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nginx
+          push: true
+          tags: |
+            ghcr.io/kalio-sp/film-react-nest-nginx:latest

@@ -3,28 +3,31 @@ services:
     image: postgres:16
     container_name: film-postgres
     restart: always
+
     environment:
       POSTGRES_DB: films
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Redmi_1a
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/test/postgres.init.sql:/docker-entrypoint-initdb.d/init.sql
+
     networks:
       - film-network
 
   backend:
     image: ghcr.io/kalio-sp/film-react-nest-backend:latest
-    build:
-      context: ./backend
     container_name: film-backend
     restart: always
+
     depends_on:
       - postgres
+
     environment:
       PORT: 3000
 
       DATABASE_DRIVER: postgres
+
       DATABASE_URL: postgres://postgres:Redmi_1a@postgres:5432/films
 
       DATABASE_HOST: postgres
@@ -39,8 +42,6 @@ services:
 
   frontend:
     image: ghcr.io/kalio-sp/film-react-nest-frontend:latest
-    build:
-      context: ./frontend
     container_name: film-frontend
 
     volumes:
@@ -50,6 +51,8 @@ services:
       - film-network
 
   nginx:
+    image: ghcr.io/kalio-sp/film-react-nest-nginx:latest
+
     build:
       context: ./nginx
 
@@ -70,6 +73,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
+
     container_name: film-pgadmin
 
     environment:
