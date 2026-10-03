@@ -1,25 +1,23 @@
-import { ConfigModule, ConfigService } from '@nestjs/config';
-
-export interface AppConfig {
-  port: number;
-
-  database: {
-    url: string;
-  };
-}
-
 export const configProvider = {
-  imports: [ConfigModule],
+  provide: 'APP_CONFIG',
 
-  provide: 'CONFIG',
-
-  inject: [ConfigService],
-
-  useFactory: (configService: ConfigService): AppConfig => ({
-    port: Number(configService.get<string>('PORT')) || 3000,
+  useFactory: () => ({
+    port: Number(process.env.PORT) || 3000,
 
     database: {
-      url: configService.get<string>('MONGO_URL') ?? '',
+      driver: process.env.DATABASE_DRIVER || 'postgres',
+
+      url: process.env.DATABASE_URL,
+
+      host: process.env.DATABASE_HOST || 'localhost',
+
+      port: Number(process.env.DATABASE_PORT) || 5432,
+
+      name: process.env.DATABASE_NAME || 'films',
+
+      username: process.env.DATABASE_USERNAME || 'postgres',
+
+      password: process.env.DATABASE_PASSWORD || '',
     },
   }),
 };

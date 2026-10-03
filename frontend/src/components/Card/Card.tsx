@@ -17,9 +17,7 @@ export function Card({
   className,
   onClick,
 }: CardProps) {
-  const src = image || posterImage || "";
-
-  const imageUrl = src.startsWith("http") ? src : "http://localhost:3000" + src;
+  const imageUrl = image || posterImage || "";
 
   return (
     <article className={clsx(styles.card, className)} onClick={onClick}>

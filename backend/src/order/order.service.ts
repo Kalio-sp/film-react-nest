@@ -1,13 +1,30 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { randomUUID } from 'crypto';
+
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { OrderDto } from './dto/order.dto';
+import { Order } from './entities/order.entity';
+
 import { FilmsRepository } from '../films/films.repository';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly filmsRepository: FilmsRepository) {}
+  constructor(
+    private readonly filmsRepository: FilmsRepository,
+
+    private readonly dataSource: DataSource,
+
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
+  ) {}
 
   async createOrder(orderDto: OrderDto) {
+    if (!orderDto.tickets.length) {
+      throw new BadRequestException('Tickets required');
+    }
+
     const firstTicket = orderDto.tickets[0];
 
     const film = await this.filmsRepository.findById(firstTicket.film);
@@ -28,12 +45,10 @@ export class OrderService {
       (ticket) => `${ticket.row}:${ticket.seat}`,
     );
 
-    // проверка дубликатов внутри заказа
     if (new Set(seatKeys).size !== seatKeys.length) {
       throw new BadRequestException('Duplicate seats');
     }
 
-    // проверка существования мест
     for (const ticket of orderDto.tickets) {
       if (
         ticket.row < 1 ||
@@ -51,30 +66,56 @@ export class OrderService {
       }
     }
 
-    // сохраняем занятые места
+    const savedOrder = await this.dataSource.transaction(async (manager) => {
+      schedule.taken.push(...seatKeys);
 
-    schedule.taken.push(...seatKeys);
+      await manager.save(schedule);
 
-    await this.filmsRepository.update(firstTicket.film, film);
+      return manager.save(Order, {
+        id: randomUUID(),
+
+        email: orderDto.email,
+
+        phone: orderDto.phone,
+
+        tickets: orderDto.tickets.map((ticket) => ({
+          id: randomUUID(),
+
+          film: ticket.film,
+
+          session: ticket.session,
+
+          daytime: ticket.daytime,
+
+          row: ticket.row,
+
+          seat: ticket.seat,
+
+          price: ticket.price,
+        })),
+      });
+    });
 
     return {
-      total: orderDto.tickets.length,
+      total: savedOrder.tickets.length,
 
-      items: orderDto.tickets.map((ticket) => ({
-        id: crypto.randomUUID(),
-
-        film: ticket.film,
-
-        session: ticket.session,
-
-        daytime: ticket.daytime,
-
-        row: ticket.row,
-
-        seat: ticket.seat,
-
-        price: ticket.price,
-      })),
+      items: savedOrder.tickets,
     };
+  }
+
+  async getOrders(email: string) {
+    return this.orderRepository.find({
+      where: {
+        email,
+      },
+
+      relations: {
+        tickets: true,
+      },
+
+      order: {
+        createdAt: 'DESC',
+      },
+    });
   }
 }

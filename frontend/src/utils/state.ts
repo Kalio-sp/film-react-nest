@@ -10,13 +10,13 @@ export interface AppState {
   selectedSession: string | null;
 
   basket: Ticket[];
+  orders: Ticket[];
 
   contacts: Contacts;
 
   modal: Modals | null;
 
   message: string;
-
   isError: boolean;
 }
 
@@ -30,6 +30,7 @@ export type Actions =
   | { type: "setContacts"; payload: Contacts }
   | { type: "openModal"; payload: Modals }
   | { type: "closeModal" }
+  | { type: "saveOrder"; payload: Ticket[] }
   | { type: "clearBasket" };
 
 export const initialState: AppState = {
@@ -42,6 +43,8 @@ export const initialState: AppState = {
   selectedSession: null,
 
   basket: [],
+
+  orders: [],
 
   contacts: {
     email: "",
@@ -73,7 +76,6 @@ const addTicket = (state: AppState, key: string): AppState => {
   if (exists) {
     return {
       ...state,
-
       basket: state.basket.filter(
         (ticket) => ticket.row !== row || ticket.seat !== seat,
       ),
@@ -82,21 +84,15 @@ const addTicket = (state: AppState, key: string): AppState => {
 
   const ticket: Ticket = {
     film: state.selectedFilm,
-
     session: session.id,
-
     daytime: session.daytime,
-
     row,
-
     seat,
-
     price: session.price,
   };
 
   return {
     ...state,
-
     basket: [...state.basket, ticket],
   };
 };
@@ -106,7 +102,6 @@ const removeTicket = (state: AppState, key: string): AppState => {
 
   return {
     ...state,
-
     basket: state.basket.filter(
       (ticket) => ticket.row !== row || ticket.seat !== seat,
     ),
@@ -118,20 +113,20 @@ const validateOrder = (state: AppState): AppState => {
 
   if (
     state.contacts.email &&
-    !/[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/.test(state.contacts.email)
+    !/^[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+$/.test(state.contacts.email)
   ) {
     errors.push("Некорректный email");
   }
 
-  if (state.contacts.phone && !/\+7\d{10}/.test(state.contacts.phone)) {
+  const phone = state.contacts.phone.replace(/\s/g, "");
+
+  if (phone && !/^\+\d{10,15}$/.test(phone)) {
     errors.push("Некорректный телефон");
   }
 
   return {
     ...state,
-
     message: errors.join("; "),
-
     isError: errors.length > 0,
   };
 };
@@ -141,30 +136,25 @@ export function appReducer(state: AppState, action: Actions): AppState {
     case "setFilms":
       return {
         ...state,
-
         films: action.payload,
-
         selectedFilm: action.payload[0]?.id ?? null,
       };
 
     case "selectFilm":
       return {
         ...state,
-
         selectedFilm: action.payload,
       };
 
     case "setSchedule":
       return {
         ...state,
-
         schedule: action.payload,
       };
 
     case "selectSession":
       return {
         ...state,
-
         selectedSession: action.payload,
       };
 
@@ -177,30 +167,36 @@ export function appReducer(state: AppState, action: Actions): AppState {
     case "setContacts":
       return validateOrder({
         ...state,
-
-        contacts: action.payload,
+        contacts: {
+          email: action.payload.email,
+          phone: action.payload.phone,
+        },
       });
+
+    case "saveOrder":
+      return {
+        ...state,
+        orders: [...state.orders, ...action.payload],
+      };
 
     case "openModal":
       return {
         ...state,
-
         modal: action.payload,
       };
 
     case "closeModal":
       return {
         ...state,
-
         modal: null,
+        message: "",
+        isError: false,
       };
 
     case "clearBasket":
       return {
         ...state,
-
         basket: [],
-
         selectedSession: null,
       };
   }

@@ -1,37 +1,72 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
-import { Film, FilmDocument } from './schemas/film.schema';
+import { Film } from './entities/film.entity';
+import { Schedule } from './entities/schedule.entity';
 
 @Injectable()
 export class FilmsRepository {
   constructor(
-    @InjectModel(Film.name)
-    private readonly filmModel: Model<FilmDocument>,
+    @InjectRepository(Film)
+    private readonly filmRepository: Repository<Film>,
+
+    @InjectRepository(Schedule)
+    private readonly scheduleRepository: Repository<Schedule>,
   ) {}
 
   findAll() {
-    return this.filmModel.find().exec();
+    return this.filmRepository.find({
+      relations: {
+        schedule: true,
+      },
+    });
   }
 
   findOne(id: string) {
-    return this.filmModel.findOne({ id }).exec();
+    return this.filmRepository.findOne({
+      where: {
+        id,
+      },
+
+      relations: {
+        schedule: true,
+      },
+    });
   }
 
   findById(id: string) {
-    return this.filmModel.findOne({ id }).exec();
+    return this.filmRepository.findOne({
+      where: {
+        id,
+      },
+
+      relations: {
+        schedule: true,
+      },
+    });
   }
 
   findSchedule(id: string) {
-    return this.filmModel
-      .findOne({ id })
-      .select('schedule')
-      .exec()
-      .then((film) => film?.schedule ?? []);
+    return this.scheduleRepository.find({
+      where: {
+        film: {
+          id,
+        },
+      },
+    });
   }
 
-  update(id: string, film: FilmDocument) {
-    return this.filmModel.findOneAndUpdate({ id }, film, { new: true }).exec();
+  async update(id: string, film: Film) {
+    const entity = await this.filmRepository.preload({
+      id,
+      ...film,
+    });
+
+    if (!entity) {
+      return null;
+    }
+
+    return this.filmRepository.save(entity);
   }
 }
