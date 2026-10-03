@@ -70,6 +70,7 @@ services:
 
     volumes:
       - frontend_dist:/usr/share/nginx/html
+      - /var/www/certbot:/var/www/certbot
 
     networks:
       - film-network
