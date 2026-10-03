@@ -63,6 +63,7 @@ services:
 
     ports:
       - "80:80"
+      - "443:443"
 
     depends_on:
       - backend
@@ -71,6 +72,7 @@ services:
     volumes:
       - frontend_dist:/usr/share/nginx/html
       - /var/www/certbot:/var/www/certbot
+      - /etc/letsencrypt:/etc/letsencrypt:ro
 
     networks:
       - film-network
