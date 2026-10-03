@@ -5,9 +5,9 @@ services:
     restart: always
 
     environment:
-      POSTGRES_DB: films
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Redmi_1a
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -26,17 +26,17 @@ services:
       - postgres
 
     environment:
-      PORT: 3000
+      PORT: ${BACKEND_PORT}
 
       DATABASE_DRIVER: postgres
-      DATABASE_URL: postgres://postgres:Redmi_1a@postgres:5432/films
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}
 
       DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: films
+      DATABASE_PORT: ${POSTGRES_PORT}
+      DATABASE_NAME: ${POSTGRES_DB}
 
-      DATABASE_USERNAME: postgres
-      DATABASE_PASSWORD: Redmi_1a
+      DATABASE_USERNAME: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
 
     networks:
       - film-network
@@ -80,8 +80,8 @@ services:
     restart: always
 
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
 
     ports:
       - "8080:80"
