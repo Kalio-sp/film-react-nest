@@ -1,5 +1,6 @@
 import "dayjs/locale/ru";
 import dayjs from "dayjs";
+import { CDN_URL } from "./constants";
 
 dayjs.locale("ru");
 
@@ -117,6 +118,14 @@ export interface IFilmAPI {
 }
 
 export class FilmAPI extends Api implements IFilmAPI {
+  private resolveImage(path: string): string {
+    if (!path) return path;
+    if (path.startsWith("http")) return path;
+    if (path.startsWith(CDN_URL)) return path;
+
+    return CDN_URL + (path.startsWith("/") ? path : "/" + path);
+  }
+
   async getFilms(): Promise<Movie[]> {
     const response = await this._get<{
       total: number;
@@ -125,9 +134,8 @@ export class FilmAPI extends Api implements IFilmAPI {
 
     return response.items.map((film) => ({
       ...film,
-
-      image: film.image,
-      cover: film.cover,
+      image: this.resolveImage(film.image),
+      cover: this.resolveImage(film.cover),
     }));
   }
 
