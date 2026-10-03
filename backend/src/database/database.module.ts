@@ -31,7 +31,7 @@ import { OrderTicket } from '../order/entities/order-ticket.entity';
 
         entities: [Film, Schedule, Order, OrderTicket],
 
-        synchronize: false,
+        synchronize: true,
       }),
     }),
   ],

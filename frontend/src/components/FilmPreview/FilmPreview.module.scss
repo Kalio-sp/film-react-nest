@@ -2,16 +2,32 @@
 @use "../../scss/mixins";
 
 .hero {
-  display: flex;
   position: relative;
+  min-height: 560px;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+
   .background {
-    @include mixins.sublayer;
-    object-fit: cover;
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+    object-position: center top;
+
+    z-index: 0;
   }
+
   .content {
     @include mixins.container;
+    position: relative;
     z-index: 1;
   }
+
   .action {
     margin-top: $defaultPadding;
   }

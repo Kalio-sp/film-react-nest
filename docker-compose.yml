@@ -16,7 +16,9 @@ services:
       - film-network
 
   backend:
-    image: ghcr.io/kalio-sp/film-react-nest-backend:latest
+    build:
+      context: ./backend
+
     container_name: film-backend
     restart: always
 
@@ -27,7 +29,6 @@ services:
       PORT: 3000
 
       DATABASE_DRIVER: postgres
-
       DATABASE_URL: postgres://postgres:Redmi_1a@postgres:5432/films
 
       DATABASE_HOST: postgres
@@ -41,22 +42,24 @@ services:
       - film-network
 
   frontend:
-    image: ghcr.io/kalio-sp/film-react-nest-frontend:latest
+    build:
+      context: ./frontend
+
     container_name: film-frontend
+    restart: always
 
     volumes:
-      - frontend_dist:/app/dist
+      - frontend_dist:/usr/share/nginx/html
 
     networks:
       - film-network
 
   nginx:
-    image: ghcr.io/kalio-sp/film-react-nest-nginx:latest
-
     build:
       context: ./nginx
 
     container_name: film-nginx
+    restart: always
 
     ports:
       - "80:80"
@@ -73,8 +76,8 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-
     container_name: film-pgadmin
+    restart: always
 
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com

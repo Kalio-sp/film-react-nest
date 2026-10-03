@@ -8,9 +8,7 @@ export type FilmPreviewProps = FilmInfoProps & {
 };
 
 export function FilmPreview({ onClick, cover, ...props }: FilmPreviewProps) {
-  const imageUrl = cover.startsWith("http")
-    ? cover
-    : "http://localhost:3000" + cover;
+  const imageUrl = cover.startsWith("http") ? cover : cover;
 
   return (
     <main className={styles.hero}>
